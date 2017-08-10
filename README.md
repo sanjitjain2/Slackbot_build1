@@ -7,8 +7,10 @@ Usage-
 3. Access the bot from your slack-messaging and use the below inputs to use it.
 
 Input-['hello', 'bonjour', 'hey', 'hi', 'sup', 'morning', 'hola', 'ohai', 'yo']
+
 Output-['Sup, {mention}...','Yo!','Hola {mention}','Bonjour!']
 
 Input-['bye', 'goodbye', 'revoir', 'adios', 'later', 'cya']
+
 Output-['see you later, alligator...','adios amigo','Bye {mention}!','Au revoir!']
 
