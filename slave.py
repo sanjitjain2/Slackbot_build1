@@ -1,6 +1,9 @@
 import os, slackclient, time
-
 import random
+import requests,bs4,sys
+
+#from google_search import search_google
+
 #export SLAVE_SLACK_TOK
 #export SLAVE_SLACK_NAME=slavebot
 #export SLAVE_SLACK_ID=U60R56RP1
@@ -10,7 +13,7 @@ SOCKET_DELAY = 1
 
 #slackbot enviornment variables
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN = 'xoxb-204855229783-69I76aQki6cyGcyi0gmJ35Wo'
+SLAVE_SLACK_TOKEN = 'xoxb-204855229783-8LKQPVWIT61qU7vlUs6HhicA'
 SLAVE_SLACK_ID = 'U60R56RP1'
 
 slave_slack_client = slackclient.SlackClient(SLAVE_SLACK_TOKEN)
@@ -44,10 +47,20 @@ def handle_message(message,user,channel):
 	if is_hi(message):
 		user_mention = get_mention(user)
 		post_message(message=say_hi(user_mention),channel=channel)
+
+	elif is_google_search(message):
+		user_mention = get_mention(user)
+		edit_message = message
+		post_message(message='Googling... ' + edit_message.split(' ',1)[1],channel=channel)
+		for counter_var in range(1,6):
+			post_message(message=search_google(edit_message.split(' ',1)[1],channel,counter_var),channel=channel)
+
 	elif is_bye(message):
 		user_mention = get_mention(user)
 		post_message(message=say_bye(user_mention),channel=channel)
-
+	
+	else:
+		post_message(message='Could not understand you!',channel=channel)
 
 def post_message(message,channel):
 	slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -95,6 +108,33 @@ def run():
 	else:
 		print('[.] Connection to SlaveBot failed.')
 
+#ADDING OF MODULES BEGIN HERE
+
+def is_google_search(message):
+	#Check if message sent is query for google search results
+	tokens = [word.lower() for word in message.strip().split()]
+	for g in ['google', 'search']:
+		if g in tokens:
+			return True
+	else:
+		return False
+
+def search_google(query,channel,i):
+	res = requests.get('http://www.google.com/search?q=' + query)
+
+	try:
+		res.raise_for_status()
+	except Exception as exc:
+		post_message(message='There was a problem',channel=channel)
+	
+	#retrieve top search results links
+	soup = bs4.BeautifulSoup(res.text,"html5lib")
+
+	#Open a browser tab for each result
+	linkElems = soup.select('.r a')
+	numOpen = min(5,len(linkElems))
+
+	return (linkElems[i+1].get('href')[len('/url?q='):])
 
 if __name__ == "__main__":
 	run()
