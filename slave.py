@@ -58,13 +58,20 @@ def handle_message(message,user,channel):
 		post_message(message='Googling... ' + edit_message.split(' ',1)[1],channel=channel)
 		for counter_var in range(1,6):
 			post_message(message=search_google(edit_message.split(' ',1)[1],channel,counter_var),channel=channel)
+	
+	elif is_weather( message):
+        	tell_weather(message, channel)
+		
+	elif is_time( message):
+        	mention = get_mention( user)
+        	post_message( tell_time(mention), channel)
 
 	elif is_bye(message):
 		user_mention = get_mention(user)
 		post_message(message=say_bye(user_mention),channel=channel)
 	
 	else:
-		post_message(message='Could not understand you!',channel=channel)
+		post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
 	slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -107,6 +114,25 @@ def say_bye(user_mention):
                                        'Au revoir!'])
 	return response_template.format(mention=user_mention)
 
+
+def is_weather( message):
+    return any( message.strip().lower().startswith(st) for st in ['weather', 'tell me weather'])
+
+
+def weather_forecast(place):
+    base_url = 'http://api.openweathermap.org/data/2.5/forecast?q='
+    url = base_url + place + 'india&APPID=041d68834f4ca8f569d71cd6df88ae61'
+    data = json.load(urllib2.urlopen(url))
+    return data
+
+
+def tell_weather( message, channel):
+    place = message.split()[-1]
+    data2 = weather_forecast(place)
+    post_message('Condition: ' + data2['list'][0]['weather'][0]['main'] + ' (' + data2['list'][0]['weather'][0]['description']   
+                 + ')', channel)
+    post_message('Temperature: ' + str(float(data2['list'][0]['main']['temp']) - 273.15) + ' Celsius', channel)
+
 def run():
 	if slave_slack_client.rtm_connect():
 		print ('[.] SlaveBot is ON...')
@@ -114,9 +140,10 @@ def run():
 			event_list = slave_slack_client.rtm_read()
 			if len(event_list) > 0:
 				for event in event_list:
-					print (event)
+					print (event
 					if is_for_me(event):
-						handle_message(message=event.get('text'),user=event.get('user'),channel=event.get('channel'))
+						handle_message(message=event.get('text'),
+							       user=event.get('user'), channel=event.get('channel')
 			time.sleep(SOCKET_DELAY)
 	else:
 		print('[.] Connection to SlaveBot failed.')
