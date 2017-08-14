@@ -1,7 +1,11 @@
-import os, slackclient, time
+import os
+import slackclient
+import time
 import random
 import requests,bs4,sys
-
+from datetime import datetime
+import json
+import urllib2
 #from google_search import search_google
 
 #export SLAVE_SLACK_TOK
@@ -76,6 +80,15 @@ def is_bye(message):
 	tokens = [word.lower() for word in message.strip().split()]
 	return any(g in tokens for g in ['bye', 'goodbye', 'revoir', 'adios', 'later', 'cya'])
 
+
+def is_time( message):
+    message.replace('?', '')
+    return any( st in message.strip().lower() for st in ['time', 'what is the hour of the day', 
+    		'tell me the date today', "what's the day today", 'date', "what's the date today"])
+
+
+def tell_time(user_mention):
+    return str(time.ctime()) + str(user_mention)
 
 def say_hi(user_mention):
 	#Say HI to a user by formatting their mention
