@@ -2,8 +2,7 @@ import os
 import slackclient
 import time
 import random
-import requests,bs4,sys
-from datetime import datetime
+import requests, bs4, sys
 import json
 import urllib2
 #from google_search import search_google
