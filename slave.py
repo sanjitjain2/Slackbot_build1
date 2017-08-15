@@ -6,6 +6,17 @@ import requests, bs4, sys
 import json
 import urllib2
 from lang_translator import translate
+
+#from scrabble.py(whatever is the name)
+import scrabble
+
+'''
+In scrabble.py file make function scrabble() and include all code there
+add rack as the argument of the function and don't take it from the user
+return a list of all possible words along with points
+'''
+###Add this in slave.py
+
 #from google_search import search_google
 
 #export SLAVE_SLACK_TOK
@@ -74,6 +85,9 @@ def handle_message(message,user,channel):
     elif is_bye(message):
         user_mention = get_mention(user)
         post_message(message=say_bye(user_mention),channel=channel)
+        
+    elif is_scrabble(message):
+        scrabble_cheat(message, channel)
     
     else:
         post_message(message='Not sure what you have just said!',channel=channel)
@@ -197,3 +211,21 @@ def search_google(query,channel,i):
 
 if __name__ == "__main__":
     run()
+#func1
+def is_scrabble(message):
+    if message.lower().startswith('scrabble','How many words','points','scores','jumble'):
+        return True
+    else:
+        return False
+    
+#func2
+def scrabble_cheat(message, channel):
+    rack = message.split() [1]
+    words = scrabble(rack)
+    result= 'All valid words are: \n'
+    for word in words:
+        result += word + '\n'
+    post_message(result, channel)  
+ 
+
+    
