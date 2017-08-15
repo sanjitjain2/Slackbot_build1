@@ -269,23 +269,25 @@ def twitter_tweet_display(query,channel ):
 
         return text 
 
-if __name__ == "__main__":
-    run()
-#func1
+
 def is_scrabble(message):
     if message.lower().startswith('scrabble','How many words','points','scores','jumble'):
         return True
     else:
         return False
-    
-#func2
+
 def scrabble_cheat(message, channel):
     rack = message.split() [1]
     words = scrabble(rack)
     result= 'All valid words are: \n'
     for word in words:
         result += word + '\n'
-    post_message(result, channel)  
+    post_message(result, channel)
+
+
+if __name__ == "__main__":
+    run()
+  
  
 
     
