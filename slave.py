@@ -66,6 +66,9 @@ def handle_message(message,user,channel):
     
     elif is_weather( message):
             tell_weather(message, channel)
+            
+    elif is_movie(message):
+        	tell_movie(message_channel)    
         
     elif is_time( message):
             mention = get_mention( user)
@@ -119,6 +122,8 @@ def say_bye(user_mention):
                                        'Au revoir!'])
     return response_template.format(mention=user_mention)
 
+def is_movie(message):
+	return any( message.strip().lower.startswith(s) for s in ['movie rating of '])
 
 def is_weather( message):
     return any( message.strip().lower().startswith(st) for st in ['weather', 'tell me weather'])
@@ -194,6 +199,46 @@ def search_google(query,channel,i):
     numOpen = min(5,len(linkElems))
 
     return (linkElems[i+1].get('href')[len('/url?q='):])
+
+def tell_movie( message, channel):
+	remove_list = ['movie', 'rating', 'of']
+	word_list = message.split()
+	message='+'.join([i for i in word_list if i not in remove_list])
+	movie=message
+	u=str("http://www.imdb.com/find?ref_=nv_sr_fn&q=")+str(movie)+str("&s=all")
+	response = requests.get(u)
+	page = str(bs4.BeautifulSoup(response.content,"lxml"))
+	rate=[]
+	while True:
+	    url, n = getURL(page)
+	    page = page[n:]
+	    url=''.join(url)
+	    check=url.startswith('/title/')
+	    if check:
+	        link=str("http://www.imdb.com")+str(url)
+	        rate=movie_rating(link)
+	        break
+	   
+def movie_rating(url):
+	source_code=requests.get(url)
+	plain_text=source_code.text 
+	soup=bs4.BeautifulSoup(plain_text,"html5lib")
+	for line in soup.findAll('span', {'itemprop':'ratingValue'}, {'class':'rating-box__value'}):
+		final_rating_of_movie=line.string + str("/10")
+		post_message(final_rating_of_movie,channel)
+	
+def getURL(page):
+    """
+    :param page: html of web page (here: Python home page) 
+    :return: urls in that page 
+    """
+    start_link = page.find("a href")
+    if start_link == -1:
+        return None, 0
+    start_quote = page.find('"', start_link)
+    end_quote = page.find('"', start_quote + 1)
+    url = page[start_quote + 1: end_quote]
+    return url, end_quote
 
 if __name__ == "__main__":
     run()
