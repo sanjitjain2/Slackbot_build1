@@ -8,6 +8,10 @@ import urllib2
 from lang_translator import translate
 import tweepy
 from textblob import TextBlob
+import scrabble
+
+
+
 #from google_search import search_google
 
 #export SLAVE_SLACK_TOK
@@ -84,6 +88,9 @@ def handle_message(message,user,channel):
     elif is_bye(message):
         user_mention = get_mention(user)
         post_message(message=say_bye(user_mention),channel=channel)
+        
+    elif is_scrabble(message):
+        scrabble_cheat(message, channel)
     
     elif is_google_search(message):
         user_mention = get_mention(user)
@@ -264,3 +271,21 @@ def twitter_tweet_display(query,channel ):
 
 if __name__ == "__main__":
     run()
+#func1
+def is_scrabble(message):
+    if message.lower().startswith('scrabble','How many words','points','scores','jumble'):
+        return True
+    else:
+        return False
+    
+#func2
+def scrabble_cheat(message, channel):
+    rack = message.split() [1]
+    words = scrabble(rack)
+    result= 'All valid words are: \n'
+    for word in words:
+        result += word + '\n'
+    post_message(result, channel)  
+ 
+
+    
