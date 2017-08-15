@@ -209,6 +209,71 @@ def search_google(query,channel,i):
 
     return (linkElems[i+1].get('href')[len('/url?q='):])
 
+#rating
+def getURL(page):							# getting the url to use in checking rating 
+    """
+    :param page: html of web page (here: Python home page) 
+    :return: urls in that page 
+    """
+    start_link = page.find("a href")
+    if start_link == -1:
+        return None, 0
+    start_quote = page.find('"', start_link)
+    end_quote = page.find('"', start_quote + 1)
+    url = page[start_quote + 1: end_quote]
+    return url, end_quote
+    
+def movie_rating(url):
+	source_code=requests.get(url)
+	plain_text=source_code.text 
+	soup=bs4.BeautifulSoup(plain_text,"html5lib")
+	for line in soup.findAll('span', {'itemprop':'ratingValue'}, {'class':'rating-box__value'}):
+		print line.string + str("/10")
+
+def movie():
+	movie=raw_input("which movie rating you want?")
+	u=str("http://www.imdb.com/find?ref_=nv_sr_fn&q=")+str(movie)+str("&s=all")
+	response = requests.get(u)
+	page = str(bs4.BeautifulSoup(response.content,"lxml"))
+	rate=[]
+	while True:
+	    url, n = getURL(page)
+	    page = page[n:]
+	    url=''.join(url)
+	    check=url.startswith('/title/')
+	    if check:
+	        link=str("http://www.imdb.com")+str(url)
+	        rate=movie_rating(link)
+	        break
+
+def hotel_rating(url):
+	source_code=requests.get(url)
+	plain_text=source_code.text 
+	soup=bs4.BeautifulSoup(plain_text,"html5lib")
+	for line in soup.findAll('span', {'itemprop':'ratingValue'}, {'class':'rating-box__value'}):
+		print line.string + str("/100")
+		return
+
+def hotel():
+	hotel=raw_input("")+str(" trivago")
+	url ="https://www.google.com/search?q="+str(hotel)
+	response = requests.get(url)
+	page = str(bs4.BeautifulSoup(response.content,"lxml"))	
+	rate=[]
+	while True:
+	    url, n = getURL(page)
+	    page = page[n:]
+	    url=''.join(url)
+	    check=url.startswith('/url?q=')
+	    if check:
+	        url=url[7:]
+	    	break
+	hotel_rating(url)
+#to get movie rating call the function
+#	movie()
+#to get hotel rating call the function
+#	hotel()
+
 if __name__ == "__main__":
     run()
 #func1
