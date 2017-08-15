@@ -5,6 +5,7 @@ import random
 import requests, bs4, sys
 import json
 import urllib2
+from lang_translator import translate
 #from google_search import search_google
 
 #export SLAVE_SLACK_TOK
@@ -48,7 +49,11 @@ def get_mention(user):
 slave_slack_mention = get_mention(SLAVE_SLACK_ID)
 
 def handle_message(message,user,channel):
-    if is_hi(message):
+    
+    if is_translate( message):
+        tell_translation(message, channel)
+    
+    elif is_hi(message):
         user_mention = get_mention(user)
         post_message(message=say_hi(user_mention),channel=channel)
 
@@ -132,6 +137,19 @@ def tell_weather( message, channel):
     post_message('Condition: ' + data2['list'][0]['weather'][0]['main'] + ' (' + data2['list'][0]['weather'][0]['description']   
                  + ')', channel)
     post_message('Temperature: ' + str(float(data2['list'][0]['main']['temp']) - 273.15) + ' Celsius', channel)
+    
+    
+def is_translate( message):
+    if message.lower().startswith('translate'):
+        return True
+    else:
+        return False
+
+
+def tell_translation( message, channel):
+    msg = translate(message)
+    post_message(msg, channel)
+
 
 def run():
     if slave_slack_client.rtm_connect():
