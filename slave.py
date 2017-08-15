@@ -210,7 +210,9 @@ def tell_movie( message, channel):
 	page = str(bs4.BeautifulSoup(response.content,"lxml"))
 	rate=[]
 	while True:
-	    url, n = getURL(page)
+	    a= getURL(page)
+	    url=str(a[0])
+	    n=int(a[1])
 	    page = page[n:]
 	    url=''.join(url)
 	    check=url.startswith('/title/')
@@ -218,6 +220,7 @@ def tell_movie( message, channel):
 	        link=str("http://www.imdb.com")+str(url)
 	        rate=movie_rating(link)
 	        break
+	    a=[]
 	   
 def movie_rating(url):
 	source_code=requests.get(url)
