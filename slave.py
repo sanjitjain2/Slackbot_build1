@@ -6,6 +6,8 @@ import requests, bs4, sys
 import json
 import urllib2
 from lang_translator import translate
+import tweepy
+from textblob import TextBlob
 #from google_search import search_google
 
 #export SLAVE_SLACK_TOK
@@ -17,10 +19,23 @@ SOCKET_DELAY = 1
 
 #slackbot enviornment variables
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN = 'xoxb-204855229783-8LKQPVWIT61qU7vlUs6HhicA'
+SLAVE_SLACK_TOKEN = 'xoxb-204855229783-KLBWqt1J7FzirF8cbCIBeKt7'
 SLAVE_SLACK_ID = 'U60R56RP1'
 
+#Twitter API TOKENS
+consumer_key = '5Qbbcl82L7mayRZzh4FJ3JMEd'
+consumer_secret = 'd14G2ONotsCvh3Xp9uJTRfu5smQQovS3y2e8NupSiOYp3TCd3e'
+
+access_token = '1384580544-uGKZOBGLoAg4bRsEArcCySDi4WFupBCMusyblp0'
+access_token_secret = 'JLLOhNwJZN9Dc4iHUoP6UoqgliPq7IjTkJWTovSF4n2XF'
+
+
+#Authentication of API and Clients
 slave_slack_client = slackclient.SlackClient(SLAVE_SLACK_TOKEN)
+
+auth = tweepy.OAuthHandler(consumer_key,consumer_secret)
+auth.set_access_token(access_token,access_token_secret)
+api = tweepy.API(auth)
 
 
 def is_for_me(event):
@@ -49,7 +64,9 @@ def get_mention(user):
 slave_slack_mention = get_mention(SLAVE_SLACK_ID)
 
 def handle_message(message,user,channel):
-    
+    #if message == None:
+	#	pass
+		
     if is_translate( message):
         tell_translation(message, channel)
     
@@ -57,13 +74,6 @@ def handle_message(message,user,channel):
         user_mention = get_mention(user)
         post_message(message=say_hi(user_mention),channel=channel)
 
-    elif is_google_search(message):
-        user_mention = get_mention(user)
-        edit_message = message
-        post_message(message='Googling... ' + edit_message.split(' ',1)[1],channel=channel)
-        for counter_var in range(1,6):
-            post_message(message=search_google(edit_message.split(' ',1)[1],channel,counter_var),channel=channel)
-    
     elif is_weather( message):
             tell_weather(message, channel)
         
@@ -75,8 +85,29 @@ def handle_message(message,user,channel):
         user_mention = get_mention(user)
         post_message(message=say_bye(user_mention),channel=channel)
     
-    else:
-        post_message(message='Not sure what you have just said!',channel=channel)
+    elif is_google_search(message):
+        user_mention = get_mention(user)
+        edit_message = message.split(' ',1)[1]
+        post_message(message='Googling... ',channel=channel)
+        for counter in range(1,6):
+            post_message(message=search_google(edit_message,channel,counter),channel=channel)	
+            
+    elif is_twitter_search(message):
+		if message == None:
+			pass
+		user_mention = get_mention(user)
+		test_message = message.split(' ',1)[1]
+		post_message(message='Searching recent tweets  ' ,channel=channel)
+		public_tweets = api.search(test_message)
+		for tweet in public_tweets:
+			text = tweet.text
+			#Cleaning the tweet
+			analysis = TextBlob(text)
+			post_message(message = text,channel=channel)
+    
+   
+   # else:
+    #    post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -84,18 +115,24 @@ def post_message(message,channel):
 
 
 def is_hi(message):
-    tokens = [word.lower() for word in message.strip().split()]
-    return any(g in tokens for g in ['hello', 'bonjour', 'hey', 'hi', 'sup', 'morning', 'hola', 'ohai', 'yo'])
+	if message == None:
+		return False
+	tokens = [word.lower() for word in message.strip().split()]
+	return any(g in tokens for g in ['hello', 'bonjour', 'hey', 'hi', 'sup', 'morning', 'hola', 'ohai', 'yo'])
 
 
 def is_bye(message):
-    tokens = [word.lower() for word in message.strip().split()]
-    return any(g in tokens for g in ['bye', 'goodbye', 'revoir', 'adios', 'later', 'cya'])
+	if message == None:
+		return False
+	tokens = [word.lower() for word in message.strip().split()]
+	return any(g in tokens for g in ['bye', 'goodbye', 'revoir', 'adios', 'later', 'cya'])
 
 
 def is_time( message):
-    message.replace('?', '')
-    return any( st in message.strip().lower() for st in ['time', 'what is the hour of the day', 
+	if message == None:
+		return False
+	message.replace('?', '')
+	return any( st in message.strip().lower() for st in ['time', 'what is the hour of the day', 
             'tell me the date today', "what's the day today", 'date', "what's the date today"])
 
 
@@ -121,7 +158,10 @@ def say_bye(user_mention):
 
 
 def is_weather( message):
-    return any( message.strip().lower().startswith(st) for st in ['weather', 'tell me weather'])
+	if message == None: #added this line as after processing twitter message 'message' 
+						#becomes None so this line discards None objects and doesnt give errors
+		return False
+	return any( message.strip().lower().startswith(st) for st in ['weather', 'tell me weather'])
 
 
 def weather_forecast(place):
@@ -140,10 +180,12 @@ def tell_weather( message, channel):
     
     
 def is_translate( message):
-    if message.lower().startswith('translate'):
-        return True
-    else:
-        return False
+	if message == None:
+		return False
+	if message.lower().startswith('translate'):
+		return True
+	else:
+		return False
 
 
 def tell_translation( message, channel):
@@ -170,30 +212,55 @@ def run():
 #ADDING OF MODULES BEGIN HERE
 
 def is_google_search(message):
+	if message == None:
+		return False
     #Check if message sent is query for google search results
-    tokens = [word.lower() for word in message.strip().split()]
-    for g in ['google', 'search']:
-        if g in tokens:
-            return True
-    else:
-        return False
+	tokens = [word.lower() for word in message.strip().split()]
+	for g in ['google', 'search']:
+		if g in tokens:
+			return True
+	else:
+		return False
 
 def search_google(query,channel,i):
-    res = requests.get('http://www.google.com/search?q=' + query)
+	
+	res = requests.get('http://www.google.com/search?q=' + query)
+	try:
+		res.raise_for_status()
+	except Exception as exc:
+	    post_message(message='There was a problem',channel=channel)
+	
+	#retrieve top search results links
+	soup = bs4.BeautifulSoup(res.text,"html5lib")
+	
+	#Open a browser tab for each result
+	linkElems = soup.select('.r a')
+	numOpen = min(5,len(linkElems))
+	
+	return (linkElems[i+1].get('href')[len('/url?q='):])
 
-    try:
-        res.raise_for_status()
-    except Exception as exc:
-        post_message(message='There was a problem',channel=channel)
+def is_twitter_search(message):
+	if message == None:
+		return False
+	#Check if message sent is query for twitter tweet search
+	else:
+		tokens = [word.lower() for word in message.strip().split()]
+        for t in ['twitter']:
+           	if t in tokens:
+           	    return True
+        else:
+           	return False
+
+def twitter_tweet_display(query,channel ):
+    public_tweets = api.search(query)
     
-    #retrieve top search results links
-    soup = bs4.BeautifulSoup(res.text,"html5lib")
+    for tweet in public_tweets:
+        text = tweet.text
 
-    #Open a browser tab for each result
-    linkElems = soup.select('.r a')
-    numOpen = min(5,len(linkElems))
+        #Cleaning the tweet
+        analysis = TextBlob(text)
 
-    return (linkElems[i+1].get('href')[len('/url?q='):])
+        return text 
 
 if __name__ == "__main__":
     run()
