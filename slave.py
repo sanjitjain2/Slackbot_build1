@@ -8,7 +8,7 @@ import urllib2
 from lang_translator import translate
 import tweepy
 from textblob import TextBlob
-import scrabble
+from scrabble import scrabble
 
 
 
@@ -113,8 +113,8 @@ def handle_message(message,user,channel):
 			post_message(message = text,channel=channel)
     
    
-   # else:
-    #    post_message(message='Not sure what you have just said!',channel=channel)
+   else:
+       post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -271,17 +271,18 @@ def twitter_tweet_display(query,channel ):
 
 
 def is_scrabble(message):
-    if message.lower().startswith('scrabble','How many words','points','scores','jumble'):
+    if message.lower().startswith('scrabble') or message.lower().startswith('jumble'):
         return True
     else:
         return False
 
 def scrabble_cheat(message, channel):
-    rack = message.split() [1]
-    words = scrabble(rack)
-    result= 'All valid words are: \n'
+    rack = message.split()[1]
+    words = scrabble( rack)
+    result = "Bingo!! Here's the cheat ... \
+    \n Use the word with max. score and WIN your Scrabble game in minutes\n\n"
     for word in words:
-        result += word + '\n'
+        result += 'score: ' + str(word[0]) + '     ' + word[1] + '\n'
     post_message(result, channel)
 
 
