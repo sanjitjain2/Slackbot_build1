@@ -8,7 +8,7 @@ import urllib2
 from lang_translator import translate
 import tweepy
 from textblob import TextBlob
-from scrabble import Scrabble
+from Scrabble import scrabble
 
 
 
