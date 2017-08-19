@@ -91,6 +91,9 @@ def handle_message(message,user,channel):
         
     elif is_scrabble(message):
         scrabble_cheat(message, channel)
+
+    elif is_movie(message) :
+    	movie(message, channel)	
     
     elif is_google_search(message):
         user_mention = get_mention(user)
@@ -198,7 +201,14 @@ def is_translate( message):
 def tell_translation( message, channel):
     msg = translate(message)
     post_message(msg, channel)
-
+	
+def is_movie( message):
+	if message == None:
+		return False
+	if message.lower().find('movie')>=0:
+		return True
+	else:
+		return False	
 
 def run():
     if slave_slack_client.rtm_connect():
@@ -285,6 +295,27 @@ def scrabble_cheat(message, channel):
         result += 'score: ' + str(word[0]) + '     ' + word[1] + '\n'
     post_message(result, channel)
 
+def movie(message, channel):
+	m=message.split()
+	check=["movie","rating","of"]
+	resultwords  = [word for word in m if word.lower() not in check]
+	result = ' '.join(resultwords)
+	search="http://www.imdb.com/find?ref_=nv_sr_fn&q="+str(result)+"&s=all"
+	response=requests.get(search)
+	text=response.text
+	soup=bs4.BeautifulSoup(text)
+	all_link=soup.find_all("a")
+	for link in all_link:
+		if str(link.get("href")).startswith("/title/"):
+			a=str(link.get("href"))
+			url=str("http://www.imdb.com")+a
+			source_code=requests.get(url)
+			plain_text=source_code.text 
+			soup=bs4.BeautifulSoup(plain_text)
+			for line in soup.findAll('span', {'itemprop':'ratingValue'}, {'class':'rating-box__value'}):
+				rating=line.string + str("/10")
+				slave_slack_client.api_call('chat.postMessage',channel=channel,text=rating,as_user=True)
+			break
 
 if __name__ == "__main__":
     run()
