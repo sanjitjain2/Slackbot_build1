@@ -8,7 +8,7 @@ import urllib2
 from lang_translator import translate
 import tweepy
 from textblob import TextBlob
-from scrabble import scrabble
+from scrabble import Scrabble
 
 
 
@@ -116,8 +116,8 @@ def handle_message(message,user,channel):
 			post_message(message = text,channel=channel)
     
    
-   else:
-       post_message(message='Not sure what you have just said!',channel=channel)
+   #else:
+   #    post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -281,6 +281,8 @@ def twitter_tweet_display(query,channel ):
 
 
 def is_scrabble(message):
+    if message == None:
+	return False
     if message.lower().startswith('scrabble') or message.lower().startswith('jumble'):
         return True
     else:
