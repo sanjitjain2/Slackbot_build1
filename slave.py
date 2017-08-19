@@ -312,7 +312,11 @@ def hotel(message, channel):
 			for link_1 in all_link_1:
 				if str(link_1.get("alt")).find("of")>=0:
 					rating=link_1.get("alt")
-					slave_slack_client.api_call('chat.postMessage',channel=channel,text=rating,as_user=True)
+					m=rating.split()
+					check=["bubbles"]
+					resultwords  = [word for word in m if word.lower() not in check]
+					result = ' '.join(resultwords)
+					slave_slack_client.api_call('chat.postMessage',channel=channel,text=result,as_user=True)
 					break
 
 if __name__ == "__main__":
