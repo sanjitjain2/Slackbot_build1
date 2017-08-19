@@ -93,7 +93,10 @@ def handle_message(message,user,channel):
         scrabble_cheat(message, channel)
 
     elif is_movie(message) :
-    	movie(message, channel)	
+    	movie(message, channel)
+	
+    elif is_hotel(message) :
+    	hotel(message, channel)
     
     elif is_google_search(message):
         user_mention = get_mention(user)
@@ -208,7 +211,15 @@ def is_movie( message):
 	if message.lower().find('movie')>=0:
 		return True
 	else:
-		return False	
+		return False
+	
+def is_hotel( message):
+	if message == None:
+		return False
+	if message.lower().find('hotel')>=0:
+		return True
+	else:
+		return False
 
 def run():
     if slave_slack_client.rtm_connect():
@@ -296,6 +307,30 @@ def scrabble_cheat(message, channel):
     for word in words:
         result += 'score: ' + str(word[0]) + '     ' + word[1] + '\n'
     post_message(result, channel)
+
+def hotel(message, channel):
+	search="https://www.google.co.in/search?q="+message
+	response=requests.get(search)
+	text=response.text
+	soup=bs4.BeautifulSoup(text)
+	all_link=soup.find_all("a")
+	for link in all_link:
+		if str(link.get("href")).startswith("/url?q=https://www.tripadvisor.in/"):
+			a=link.get("href")
+			a=a[7:]
+			response_1=requests.get(a)
+			text_1=response_1.text
+			soup_1=bs4.BeautifulSoup(text_1)
+			all_link_1=soup_1.find_all("span")
+			for link_1 in all_link_1:
+				if str(link_1.get("alt")).find("of")>=0:
+					rating=link_1.get("alt")
+					m=rating.split()
+					check=["bubbles"]
+					resultwords  = [word for word in m if word.lower() not in check]
+					result = ' '.join(resultwords)
+					slave_slack_client.api_call('chat.postMessage',channel=channel,text=result,as_user=True)
+					break
 
 def movie(message, channel):
 	m=message.split()
