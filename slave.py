@@ -11,17 +11,14 @@ from textblob import TextBlob
 from Scrabble import scrabble
 
 
-
-#from google_search import search_google
-
 #export SLAVE_SLACK_TOK
 #export SLAVE_SLACK_NAME=slavebot
 #export SLAVE_SLACK_ID=U60R56RP1
 
-#delay in seconds before checkking for new events
+#delay in seconds before checking for new events
 SOCKET_DELAY = 1
 
-#slackbot enviornment variables
+#slackbot environment variables
 SLAVE_SLACK_NAME ='slavebot'
 SLAVE_SLACK_TOKEN = 'xoxb-204855229783-KLBWqt1J7FzirF8cbCIBeKt7'
 SLAVE_SLACK_ID = 'U60R56RP1'
@@ -118,9 +115,8 @@ def handle_message(message,user,channel):
 			analysis = TextBlob(text)
 			post_message(message = text,channel=channel)
     
-   
-   #else:
-   #    post_message(message='Not sure what you have just said!',channel=channel)
+    else:
+       post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -151,6 +147,7 @@ def is_time( message):
 
 def tell_time(user_mention):
     return str(time.ctime()) + str(user_mention)
+
 
 def say_hi(user_mention):
     #Say HI to a user by formatting their mention
