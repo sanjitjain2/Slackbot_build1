@@ -1,7 +1,7 @@
 import os
 import slackclient
 import time
-import random
+from random import randint
 import requests, bs4, sys
 import json
 import urllib2
@@ -11,16 +11,19 @@ from textblob import TextBlob
 from Scrabble import scrabble
 
 
+
+#from google_search import search_google
+
 #export SLAVE_SLACK_TOK
 #export SLAVE_SLACK_NAME=slavebot
 #export SLAVE_SLACK_ID=U60R56RP1
 
-#delay in seconds before checking for new events
+#delay in seconds before checkking for new events
 SOCKET_DELAY = 1
 
-#slackbot environment variables
+#slackbot enviornment variables
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN = 'xoxb-204855229783-KLBWqt1J7FzirF8cbCIBeKt7'
+SLAVE_SLACK_TOKEN = 'xoxb-204855229783-W8Y7dEexJvfbnj2agw93G1JU'
 SLAVE_SLACK_ID = 'U60R56RP1'
 
 #Twitter API TOKENS
@@ -99,9 +102,10 @@ def handle_message(message,user,channel):
         user_mention = get_mention(user)
         edit_message = message.split(' ',1)[1]
         post_message(message='Googling... ',channel=channel)
-        for counter in range(1,6):
+        for counter in range(1,randint(2,6)):
             post_message(message=search_google(edit_message,channel,counter),channel=channel)	
-            
+        post_message(message="End of Search Results.",channel=channel)
+
     elif is_twitter_search(message):
 		if message == None:
 			pass
@@ -113,10 +117,16 @@ def handle_message(message,user,channel):
 			text = tweet.text
 			#Cleaning the tweet
 			analysis = TextBlob(text)
-			post_message(message = text,channel=channel)
+                        if 'RT' in text:
+                            if randint(0,1):
+                                post_message(message=text,channel=channel)
+                        else:
+                                post_message(message = text,channel=channel)
+		post_message(message="End of Tweets.",channel=channel)
     
-    else:
-       post_message(message='Not sure what you have just said!',channel=channel)
+   
+   #else:
+   #    post_message(message='Not sure what you have just said!',channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -148,7 +158,6 @@ def is_time( message):
 def tell_time(user_mention):
     return str(time.ctime()) + str(user_mention)
 
-
 def say_hi(user_mention):
     #Say HI to a user by formatting their mention
     response_template = random.choice(['Sup, {mention}...',
@@ -156,7 +165,7 @@ def say_hi(user_mention):
                                        'Hola {mention}',
                                        'Bonjour!'])
     return response_template.format(mention=user_mention)
-
+0
 
 def say_bye(user_mention):
     #Say BYE to a user
@@ -260,9 +269,10 @@ def search_google(query,channel,i):
 	
 	#Open a browser tab for each result
 	linkElems = soup.select('.r a')
-	numOpen = min(5,len(linkElems))
-	
-	return (linkElems[i+1].get('href')[len('/url?q='):])
+	numOpen = min(6,len(linkElems))
+	if linkElems[i+1].get('href').startswith('/search'):
+		i = i+1
+	return (linkElems[i+1].get('href')[len('/url?q='):])  
 
 def is_twitter_search(message):
 	if message == None:
@@ -290,7 +300,7 @@ def twitter_tweet_display(query,channel ):
 
 def is_scrabble(message):
     if message == None:
-	return False
+		return False
     if message.lower().startswith('scrabble') or message.lower().startswith('jumble'):
         return True
     else:
@@ -298,12 +308,9 @@ def is_scrabble(message):
 
 def scrabble_cheat(message, channel):
     rack = message.split()[1]
-    words = scrabble( rack)
-    result = "Bingo!! Here's the cheat ... \
-    \n Use the word with max. score and WIN your Scrabble game in minutes\n\n"
-    for word in words:
-        result += 'score: ' + str(word[0]) + '     ' + word[1] + '\n'
-    post_message(result, channel)
+    words = scrabble(rack)
+    #result = "Valid Words with scores:\n\n"
+    post_message(words, channel)
 
 def hotel(message, channel):
 	search="https://www.google.co.in/search?q="+message
