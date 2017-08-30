@@ -23,7 +23,7 @@ SOCKET_DELAY = 1
 
 #slackbot enviornment variables
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN = 'xoxb-204855229783-W8Y7dEexJvfbnj2agw93G1JU'
+SLAVE_SLACK_TOKEN = 'xoxb-204855229783-yoyi98I1PUWFslReooEJF354'
 SLAVE_SLACK_ID = 'U60R56RP1'
 
 #Twitter API TOKENS
@@ -70,20 +70,23 @@ slave_slack_mention = get_mention(SLAVE_SLACK_ID)
 def handle_message(message,user,channel):
     #if message == None:
 	#	pass
+	
+    if is_help(message):
+        display_help(channel)
 		
-    if is_translate( message):
-        tell_translation(message, channel)
-    
+    if is_translate(message):
+	tell_translation(message, channel)
+   
     elif is_hi(message):
-        user_mention = get_mention(user)
+	user_mention = get_mention(user)
         post_message(message=say_hi(user_mention),channel=channel)
 
     elif is_weather( message):
-            tell_weather(message, channel)
+	tell_weather(message, channel)
         
     elif is_time( message):
-            mention = get_mention( user)
-            post_message( tell_time(mention), channel)
+	mention = get_mention( user)
+	post_message( tell_time(mention), channel)
 
     elif is_bye(message):
         user_mention = get_mention(user)
@@ -101,8 +104,10 @@ def handle_message(message,user,channel):
     elif is_google_search(message):
         user_mention = get_mention(user)
         edit_message = message.split(' ',1)[1]
+        test2_message = message
+        i = int(test2_message.split()[-1])
         post_message(message='Googling... ',channel=channel)
-        for counter in range(1,randint(2,6)):
+        for counter in range(0,i):
             post_message(message=search_google(edit_message,channel,counter),channel=channel)	
         post_message(message="End of Search Results.",channel=channel)
 
@@ -113,15 +118,24 @@ def handle_message(message,user,channel):
 		test_message = message.split(' ',1)[1]
 		post_message(message='Searching recent tweets  ' ,channel=channel)
 		public_tweets = api.search(test_message)
+		test1_message = message
+		i = int(test1_message.split()[-1])
+		if i >15:
+			post_message(message='ERROR:Cannot fetch more than 15 tweets per API Call',channel=channel)
+		counter = 1
 		for tweet in public_tweets:
-			text = tweet.text
+			#post_message(message=counter,channel=channel)
+			if(counter == i):
+				break
+			counter = counter + 1		
+			#text = tweet.text
 			#Cleaning the tweet
-			analysis = TextBlob(text)
-                        if 'RT' in text:
-                            if randint(0,1):
-                                post_message(message=text,channel=channel)
-                        else:
-                                post_message(message = text,channel=channel)
+			analysis = TextBlob(tweet.text)
+           	#if 'RT' in text:
+           	#	if randint(0,1):
+			post_message(message=tweet.text,channel=channel)
+           	#else:
+           	#	post_message(message = text,channel=channel)
 		post_message(message="End of Tweets.",channel=channel)
     
    
@@ -250,7 +264,7 @@ def is_google_search(message):
 		return False
     #Check if message sent is query for google search results
 	tokens = [word.lower() for word in message.strip().split()]
-	for g in ['google', 'search']:
+	for g in ['google', 'search','Google','Search']:
 		if g in tokens:
 			return True
 	else:
@@ -280,7 +294,7 @@ def is_twitter_search(message):
 	#Check if message sent is query for twitter tweet search
 	else:
 		tokens = [word.lower() for word in message.strip().split()]
-        for t in ['twitter']:
+        for t in ['twitter','Twitter']:
            	if t in tokens:
            	    return True
         else:
@@ -358,6 +372,20 @@ def movie(message, channel):
 				slave_slack_client.api_call('chat.postMessage',channel=channel,text=rating,as_user=True)
 			break
 
+def is_help(message):
+	if message == None:
+		return False
+	#Check if message sent is query for help
+	else:
+		tokens = [word.lower() for word in message.strip().split()]
+		for t in ['help','commands']:
+        	    if t in tokens:
+        		return True
+                else:
+                    return False
+
+def display_help(channel):
+	post_message(message="Display time: time\n\nWeather: weather at [CITY_NAME]\n\nGoogle Search: Google [QUERY] [NUMBER OF RESULTS]\n\nTwiter Tweet display: Twitter [QUERY] [NUMBER OF TWEETS]\n\nLanguage Translation:Translate [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nScrabble Words:scrabble [WORDS]\n\n",channel=channel)
 if __name__ == "__main__":
     run()
   

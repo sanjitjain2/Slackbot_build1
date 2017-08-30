@@ -3,7 +3,7 @@ import os,slackclient
 #slavebot
 #U60R56RP1                                           
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN ='xoxb-204855229783-69I76aQki6cyGcyi0gmJ35Wo'
+SLAVE_SLACK_TOKEN ='xoxb-204855229783-yoyi98I1PUWFslReooEJF354'
 
 #initialize the slack client
 slave_slack_client = slackclient.SlackClient(SLAVE_SLACK_TOKEN)
