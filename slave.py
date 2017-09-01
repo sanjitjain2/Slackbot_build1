@@ -142,8 +142,8 @@ def handle_message(message,user,channel):
 		post_message(message="End of Tweets.",channel=channel)
     
    
-   #else:
-   #    post_message(message='Not sure what you have just said!',channel=channel)
+   else:
+       post_message(message="I'm sorry. Not sure what you have just said!\n You can head over to HELP for more assistance!",channel=channel)
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -168,8 +168,11 @@ def is_time( message):
 	if message == None:
 		return False
 	message.replace('?', '')
-	return any( st in message.strip().lower() for st in ['time', 'what is the hour of the day', 
-            'tell me the date today', "what's the day today", 'date', "what's the date today"])
+	message = message.lower().split()[0]
+    	if message in ['time', 'date', "what's the date today"]:
+        	return True
+    	else:
+        	return False
 
 
 def tell_time(user_mention):
