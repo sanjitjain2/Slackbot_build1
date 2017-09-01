@@ -101,6 +101,9 @@ def handle_message(message,user,channel):
     elif is_hotel(message) :
     	hotel(message, channel)
     
+    elif is_gif(message) :
+	gif(message, channel)
+
     elif is_google_search(message):
         user_mention = get_mention(user)
         edit_message = message.split(' ',1)[1]
@@ -179,7 +182,6 @@ def say_hi(user_mention):
                                        'Hola {mention}',
                                        'Bonjour!'])
     return response_template.format(mention=user_mention)
-0
 
 def say_bye(user_mention):
     #Say BYE to a user
@@ -372,6 +374,40 @@ def movie(message, channel):
 				slave_slack_client.api_call('chat.postMessage',channel=channel,text=rating,as_user=True)
 			break
 
+def is_gif(message):
+	if message == None:
+		return False
+	else:
+		tokens = [word.lower() for word in message.strip().split()]
+		for t in ['gif']:
+        	    if t in tokens:
+        		return True
+                else:
+                    return False
+			
+def gif(message, channel):
+	answer=[]
+	check=["gif"]
+	resultwords  = [word for word in message if word.lower() not in check]
+	result = ''.join(resultwords)
+	search="https://giphy.com/search/"+result
+	response=requests.get(search)
+	text=response.text
+	soup=bs4.BeautifulSoup(text)
+	all_link=soup.find_all("meta")
+	for link in all_link:
+		if str(link.get("content")).startswith("https://media") and str(link.get("content")).endswith(".gif"):
+				a=str(link.get("content"))
+				for j in answer:
+					if j==a:
+						break
+				else:
+					answer.append(a)
+	for url in answer:
+		gif_print=url
+		slave_slack_client.api_call('chat.postMessage',channel=channel,text=gif_print,as_user=True)
+		break	
+		
 def is_help(message):
 	if message == None:
 		return False
