@@ -421,7 +421,7 @@ def is_help(message):
                     return False
 
 def display_help(channel):
-	post_message(message="Display time: time\n\nWeather: weather at [CITY_NAME]\n\nGoogle Search: Google [QUERY] [NUMBER OF RESULTS]\n\nTwiter Tweet display: Twitter [QUERY] [NUMBER OF TWEETS]\n\nLanguage Translation:Translate [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nScrabble Words:scrabble [WORDS]\n\n",channel=channel)
+	post_message(message="Display time: time\n\nWeather: weather at [CITY_NAME]\n\nGoogle Search: Google [QUERY] [NUMBER OF RESULTS]\n\nTwiter Tweet display: Twitter [QUERY] [NUMBER OF TWEETS]\n\nLanguage Translation:Translate [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nGIF:gif [emotion]\n\nScrabble Words:scrabble [WORDS]\n\n",channel=channel)
 if __name__ == "__main__":
     run()
   
