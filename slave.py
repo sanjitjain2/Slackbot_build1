@@ -9,6 +9,7 @@ import requests, bs4, sys
 import json
 import urllib2
 from lang_translator import translate
+from tts2 import text_to_speech
 import tweepy
 from textblob import TextBlob
 from Scrabble import scrabble
@@ -79,6 +80,11 @@ def handle_message(message,user,channel):
 		
     if is_translate(message):
 	tell_translation(message, channel)
+	
+    elif message.split()[0] == 'speak':
+        msg = message.split()
+        text_to_speech(' '.join(msg[2:]), msg[1])
+        upload_file(channel)
    
     elif is_hi(message):
 	user_mention = get_mention(user)
@@ -232,6 +238,8 @@ def is_translate( message):
 def tell_translation( message, channel):
     msg = translate(message)
     post_message(msg, channel)
+    text_to_speech(msg.split(':')[1], message.split()[1])
+    upload_file(channel)
 	
 def is_movie( message):
 	if message == None:
@@ -333,6 +341,16 @@ def scrabble_cheat(message, channel):
     words = scrabble(rack)
     #result = "Valid Words with scores:\n\n"
     post_message(words, channel)
+	
+	
+def upload_file(channel):
+    with open('hello.mp3', 'rb') as f:
+        ret = vibhor_slack_client.api_call("files.upload", filename='Text_To_Speech.mp3', channels=channel, file= f)
+        print ret
+        if not 'ok' in ret or not ret['ok']:
+            # error
+            post_message('fileUpload failed %s' % ret['error'], channel=channel)
+		
 
 def hotel(message, channel):
 	search="https://www.google.co.in/search?q="+message
