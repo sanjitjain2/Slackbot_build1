@@ -1,6 +1,9 @@
+#google max links
+#time error handling
 import os
 import slackclient
 import time
+import random
 from random import randint
 import requests, bs4, sys
 import json
@@ -23,7 +26,7 @@ SOCKET_DELAY = 1
 
 #slackbot enviornment variables
 SLAVE_SLACK_NAME ='slavebot'
-SLAVE_SLACK_TOKEN = 'xoxb-204855229783-yoyi98I1PUWFslReooEJF354'
+SLAVE_SLACK_TOKEN = 'xoxb-204855229783-f7CoqgNamQjmOFtluwb1CgPy'
 SLAVE_SLACK_ID = 'U60R56RP1'
 
 #Twitter API TOKENS
@@ -109,7 +112,7 @@ def handle_message(message,user,channel):
         edit_message = message.split(' ',1)[1]
         test2_message = message
         i = int(test2_message.split()[-1])
-        post_message(message='Googling... ',channel=channel)
+        post_message(message='Googling... ',channel=channel)	#check for max links=8
         for counter in range(0,i):
             post_message(message=search_google(edit_message,channel,counter),channel=channel)	
         post_message(message="End of Search Results.",channel=channel)
@@ -124,8 +127,8 @@ def handle_message(message,user,channel):
 		test1_message = message
 		i = int(test1_message.split()[-1])
 		if i >15:
-			post_message(message='ERROR:Cannot fetch more than 15 tweets per API Call',channel=channel)
-		counter = 1
+			post_message(message='ERROR:Sorry I cannot show you more than 15 tweets at a time',channel=channel)
+		counter = 0
 		for tweet in public_tweets:
 			#post_message(message=counter,channel=channel)
 			if(counter == i):
@@ -140,10 +143,10 @@ def handle_message(message,user,channel):
            	#else:
            	#	post_message(message = text,channel=channel)
 		post_message(message="End of Tweets.",channel=channel)
-    
-   
-   else:
-       post_message(message="I'm sorry. Not sure what you have just said!\n You can head over to HELP for more assistance!",channel=channel)
+		
+    else:
+		post_message(message="I'm sorry. Not sure what you have just said!\n You can head over to HELP for more assistance!",channel=channel)
+
 
 def post_message(message,channel):
     slave_slack_client.api_call('chat.postMessage',channel=channel,text=message,as_user=True)
@@ -428,6 +431,7 @@ def display_help(channel):
 		     [NUMBER OF RESULTS]\n\nTwiter Tweet display: Twitter [QUERY] [NUMBER OF TWEETS]\n\nLanguage Translation:Translate \
 		     [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nGIF:gif \
 		     [emotion]\n\nScrabble Words:scrabble [WORDS]\n\n",channel=channel)
+		     
 if __name__ == "__main__":
     run()
   
