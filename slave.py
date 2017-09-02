@@ -81,7 +81,7 @@ def handle_message(message,user,channel):
     if is_translate(message):
 	tell_translation(message, channel)
 	
-    elif message.split()[0] == 'speak':
+    elif message.split()[0].lower() == 'speak':
         msg = message.split()
         text_to_speech(' '.join(msg[2:]), msg[1])
         upload_file(channel)
@@ -447,7 +447,7 @@ def is_help(message):
 def display_help(channel):
 	post_message(message="Display time: time\n\nWeather: weather at [CITY_NAME]\n\nGoogle Search: Google [QUERY] \
 		     [NUMBER OF RESULTS]\n\nTwiter Tweet display: Twitter [QUERY] [NUMBER OF TWEETS]\n\nLanguage Translation:Translate \
-		     [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nGIF:gif \
+		     [LANG CODE] [QUERY]\n\nText to Speech: speak [LANG CODE] [QUERY]\n\nMovie Rating: movie rating of [MOVIE_NAME]\n\nHotel Rating:hotel rating of [HOTEL_NAME]\n\nGIF:gif \
 		     [emotion]\n\nScrabble Words:scrabble [WORDS]\n\n",channel=channel)
 		     
 if __name__ == "__main__":
